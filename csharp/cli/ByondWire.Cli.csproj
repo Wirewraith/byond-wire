@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>byond-wire</ToolCommandName>
+    <PackageId>ByondWire.Cli</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Wirewraith</Authors>
+    <Description>Command-line BYOND Topic client.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Wirewraith/byond-wire</RepositoryUrl>
+  </PropertyGroup>
+  <ItemGroup><ProjectReference Include="../ByondWire.csproj" /></ItemGroup>
+  <ItemGroup><None Include="../README.md;../PROTOCOL.md;../LICENSE" Pack="true" PackagePath="/" /></ItemGroup>
+</Project>

@@ -1,0 +1,15 @@
+{
+  "name": "wirewraith/byond-wire",
+  "description": "Small standard-library BYOND Topic client",
+  "type": "library",
+  "license": "MIT",
+  "authors": [{ "name": "Wirewraith" }],
+  "require": { "php": ">=8.0" },
+  "autoload": { "files": ["php/byond-wire.php"] },
+  "bin": ["php/byond-wire"],
+  "archive": {
+    "exclude": ["/*", "!/php", "/php/test-*", "!/composer.json", "!/README.md", "!/PROTOCOL.md", "!/LICENSE"]
+  },
+  "support": { "source": "https://github.com/Wirewraith/byond-wire" },
+  "scripts": { "test": "php php/test-byond-wire.php" }
+}

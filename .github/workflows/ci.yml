@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  packages:
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [python, nodejs, rust, php, powershell, csharp, go]
+    uses: ./.github/workflows/build.yml
+    with:
+      package: ${{ matrix.package }}
+  shared:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint workflows
+        uses: docker://rhysd/actionlint:1.7.12
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m unittest discover -s packaging
+      - run: python3 -m unittest discover -s benchmarks
+      - run: sudo apt-get update && sudo apt-get install -y socat netcat-openbsd
+      - run: |
+          bash bash/test-cli.sh
+          bash bash/test-import.sh
+          bash bash/test-text.sh
+          sh shell/test-cli.sh
+  minimum-runtimes:
+    name: Minimum runtime (${{ matrix.package }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [python, nodejs, php, powershell]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        if: matrix.package == 'python'
+        with:
+          python-version: '3.9'
+      - uses: actions/setup-node@v4
+        if: matrix.package == 'nodejs'
+        with:
+          node-version: '18'
+      - uses: shivammathur/setup-php@v2
+        if: matrix.package == 'php'
+        with:
+          php-version: '8.0'
+          coverage: none
+          tools: none
+      - uses: actions/setup-dotnet@v4
+        if: matrix.package == 'powershell'
+        with:
+          dotnet-version: '8.0.x'
+      - name: Test Python 3.9
+        if: matrix.package == 'python'
+        run: python3 -m unittest discover -s python
+      - name: Test Node.js 18
+        if: matrix.package == 'nodejs'
+        run: node --test nodejs/test-byond-wire.js
+      - name: Test PHP 8.0
+        if: matrix.package == 'php'
+        run: php php/test-byond-wire.php
+      - name: Test PowerShell 7.4
+        if: matrix.package == 'powershell'
+        run: |
+          dotnet tool install PowerShell --version 7.4.0 --tool-path "$RUNNER_TEMP/powershell"
+          "$RUNNER_TEMP/powershell/pwsh" -NoProfile -File powershell/test-byond-wire.ps1
+  powershell-windows:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Test-ModuleManifest ./powershell/ByondWire.psd1 | Out-Null
+          ./powershell/test-byond-wire.ps1
+          if ($LASTEXITCODE) { throw "PowerShell tests failed: $LASTEXITCODE" }

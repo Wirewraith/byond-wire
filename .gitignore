@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+/rust/target/
+/csharp/**/bin/
+/csharp/**/obj/
+/benchmarks/csharp/bin/
+/benchmarks/csharp/obj/
+/artifacts/
+/vendor/
+/composer.lock

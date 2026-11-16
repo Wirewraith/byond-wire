@@ -1,0 +1,269 @@
+var/global/obj/subject
+world
+    fps = 10
+    visibility = 0
+    New()
+        ..()
+        subject = new
+        subject.name = "widget"
+        subject.icon = 'text-macro-icon.png'
+        spawn(3000)
+            shutdown()
+    Topic(T)
+        if(copytext(T, 1, 2) == "?")
+            T = copytext(T, 2)
+        if(T == "shutdown")
+            spawn(1)
+                shutdown()
+            return "bye"
+        if(T == "probe-id")
+            return "byond-wire text-macro-probe"
+        if(T == "probe-version")
+            return "[world.byond_version].[world.byond_build]"
+        subject.gender = "neuter"
+        var/result
+        switch(T)
+            if("bare-the")
+                result = "\the caf\u00e9"
+            if("bare-The")
+                result = "\The caf\u00e9"
+            if("bare-a")
+                result = "\a caf\u00e9"
+            if("bare-an")
+                result = "\an caf\u00e9"
+            if("bare-A")
+                result = "\A caf\u00e9"
+            if("bare-An")
+                result = "\An caf\u00e9"
+            if("bare-proper")
+                result = "\proper caf\u00e9"
+            if("bare-improper")
+                result = "\improper caf\u00e9"
+            if("bare-icon")
+                result = "\icon caf\u00e9"
+            if("bare-ref")
+                result = "\ref caf\u00e9"
+            if("bare-roman")
+                result = "\roman caf\u00e9"
+            if("bare-Roman")
+                result = "\Roman caf\u00e9"
+            if("bare-red")
+                result = "\red caf\u00e9"
+            if("bare-blue")
+                result = "\blue caf\u00e9"
+            if("bare-green")
+                result = "\green caf\u00e9"
+            if("bare-black")
+                result = "\black caf\u00e9"
+            if("bare-bold")
+                result = "\bold caf\u00e9"
+            if("bare-italic")
+                result = "\italic caf\u00e9"
+            if("bare-underline")
+                result = "\underline caf\u00e9"
+            if("expanded-the")
+                result = "\the [subject]"
+            if("expanded-icon")
+                result = "\icon[subject]"
+            if("expanded-ref")
+                result = "\ref[subject]"
+            if("expanded-roman")
+                result = "\roman[14]"
+            if("expanded-Roman")
+                result = "\Roman[14]"
+            if("expanded-he-neuter")
+                subject.gender = "neuter"
+                result = "[subject] \he"
+            if("expanded-he-male")
+                subject.gender = "male"
+                result = "[subject] \he"
+            if("expanded-he-female")
+                subject.gender = "female"
+                result = "[subject] \he"
+            if("expanded-he-plural")
+                subject.gender = "plural"
+                result = "[subject] \he"
+            if("expanded-He-neuter")
+                subject.gender = "neuter"
+                result = "[subject] \He"
+            if("expanded-He-male")
+                subject.gender = "male"
+                result = "[subject] \He"
+            if("expanded-He-female")
+                subject.gender = "female"
+                result = "[subject] \He"
+            if("expanded-He-plural")
+                subject.gender = "plural"
+                result = "[subject] \He"
+            if("expanded-she-neuter")
+                subject.gender = "neuter"
+                result = "[subject] \she"
+            if("expanded-she-male")
+                subject.gender = "male"
+                result = "[subject] \she"
+            if("expanded-she-female")
+                subject.gender = "female"
+                result = "[subject] \she"
+            if("expanded-she-plural")
+                subject.gender = "plural"
+                result = "[subject] \she"
+            if("expanded-She-neuter")
+                subject.gender = "neuter"
+                result = "[subject] \She"
+            if("expanded-She-male")
+                subject.gender = "male"
+                result = "[subject] \She"
+            if("expanded-She-female")
+                subject.gender = "female"
+                result = "[subject] \She"
+            if("expanded-She-plural")
+                subject.gender = "plural"
+                result = "[subject] \She"
+            if("expanded-his-neuter")
+                subject.gender = "neuter"
+                result = "[subject] \his"
+            if("expanded-his-male")
+                subject.gender = "male"
+                result = "[subject] \his"
+            if("expanded-his-female")
+                subject.gender = "female"
+                result = "[subject] \his"
+            if("expanded-his-plural")
+                subject.gender = "plural"
+                result = "[subject] \his"
+            if("expanded-His-neuter")
+                subject.gender = "neuter"
+                result = "[subject] \His"
+            if("expanded-His-male")
+                subject.gender = "male"
+                result = "[subject] \His"
+            if("expanded-His-female")
+                subject.gender = "female"
+                result = "[subject] \His"
+            if("expanded-His-plural")
+                subject.gender = "plural"
+                result = "[subject] \His"
+            if("expanded-him-neuter")
+                subject.gender = "neuter"
+                result = "[subject] \him"
+            if("expanded-him-male")
+                subject.gender = "male"
+                result = "[subject] \him"
+            if("expanded-him-female")
+                subject.gender = "female"
+                result = "[subject] \him"
+            if("expanded-him-plural")
+                subject.gender = "plural"
+                result = "[subject] \him"
+            if("expanded-himself-neuter")
+                subject.gender = "neuter"
+                result = "[subject] \himself"
+            if("expanded-himself-male")
+                subject.gender = "male"
+                result = "[subject] \himself"
+            if("expanded-himself-female")
+                subject.gender = "female"
+                result = "[subject] \himself"
+            if("expanded-himself-plural")
+                subject.gender = "plural"
+                result = "[subject] \himself"
+            if("expanded-herself-neuter")
+                subject.gender = "neuter"
+                result = "[subject] \herself"
+            if("expanded-herself-male")
+                subject.gender = "male"
+                result = "[subject] \herself"
+            if("expanded-herself-female")
+                subject.gender = "female"
+                result = "[subject] \herself"
+            if("expanded-herself-plural")
+                subject.gender = "plural"
+                result = "[subject] \herself"
+            if("expanded-hers-neuter")
+                subject.gender = "neuter"
+                result = "[subject] \hers"
+            if("expanded-hers-male")
+                subject.gender = "male"
+                result = "[subject] \hers"
+            if("expanded-hers-female")
+                subject.gender = "female"
+                result = "[subject] \hers"
+            if("expanded-hers-plural")
+                subject.gender = "plural"
+                result = "[subject] \hers"
+            if("expanded-th-1")
+                result = "[1]\th"
+            if("expanded-th-2")
+                result = "[2]\th"
+            if("expanded-th-3")
+                result = "[3]\th"
+            if("expanded-th-11")
+                result = "[11]\th"
+            if("expanded-th-21")
+                result = "[21]\th"
+            if("expanded-s-1")
+                result = "[1] widget\s"
+            if("expanded-s-2")
+                result = "[2] widget\s"
+            if("expanded-s-3")
+                result = "[3] widget\s"
+            if("expanded-s-11")
+                result = "[11] widget\s"
+            if("expanded-s-21")
+                result = "[21] widget\s"
+            if("ellipsis")
+                result = "caf\u00e9\..."
+            if("tab")
+                result = "a\tb"
+            if("newline")
+                result = "a\nb"
+            if("quote")
+                result = "a\"b"
+            if("backslash")
+                result = "a\\b"
+            if("less-than")
+                result = "a\<b"
+            if("greater-than")
+                result = "a\>b"
+            if("escaped-space")
+                result = "a\ b"
+            if("continued-line")
+                result = "a\
+            b"
+            if("hex")
+                result = "\xE9"
+            if("unicode")
+                result = "\u20AC"
+            if("unicode-long")
+                result = "\U01F642"
+            if("bare-white")
+                result = "\white caf\u00e9"
+            if("bare-yellow")
+                result = "\yellow caf\u00e9"
+            if("bare-cyan")
+                result = "\cyan caf\u00e9"
+            if("bare-magenta")
+                result = "\magenta caf\u00e9"
+            if("bare-navy")
+                result = "\navy caf\u00e9"
+            if("bare-teal")
+                result = "\teal caf\u00e9"
+            if("bare-normal")
+                result = "\normal caf\u00e9"
+            if("bare-b")
+                result = "\b caf\u00e9"
+            if("bare-i")
+                result = "\i caf\u00e9"
+            if("bare-u")
+                result = "\u caf\u00e9"
+            if("expanded-The")
+                result = "\The [subject]"
+            if("expanded-a")
+                result = "\a [subject]"
+            if("expanded-an")
+                result = "\an [subject]"
+            if("expanded-A")
+                result = "\A [subject]"
+            if("expanded-An")
+                result = "\An [subject]"
+        return result

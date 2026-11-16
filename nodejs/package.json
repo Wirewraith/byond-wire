@@ -1,0 +1,19 @@
+{
+  "name": "byond-wire",
+  "version": "0.1.0",
+  "description": "Small standard-library BYOND Topic client",
+  "license": "MIT",
+  "author": "Wirewraith",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wirewraith/byond-wire.git",
+    "directory": "nodejs"
+  },
+  "type": "commonjs",
+  "main": "byond-wire.js",
+  "bin": { "byond-wire": "byond-wire.js" },
+  "files": ["byond-wire.js", "PROTOCOL.md"],
+  "engines": { "node": ">=18" },
+  "scripts": { "test": "node --test test-byond-wire.js" },
+  "publishConfig": { "access": "public" }
+}

@@ -1,0 +1,203 @@
+name: Publish package
+
+on:
+  push:
+    tags:
+      - 'python/v*'
+      - 'nodejs/v*'
+      - 'rust/v*'
+      - 'powershell/v*'
+      - 'csharp/v*'
+      - 'go/v*'
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  select:
+    runs-on: ubuntu-24.04
+    outputs:
+      package: ${{ steps.release.outputs.package }}
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Validate tag against native version
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          case "$GITHUB_REF" in
+            refs/tags/*) ;;
+            *) echo 'Dispatch this workflow on an existing release tag, using gh workflow run publish.yml --ref <tag>.' >&2; exit 1 ;;
+          esac
+          python3 packaging/release.py --resolve-tag "$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+  build:
+    needs: select
+    uses: ./.github/workflows/build.yml
+    with:
+      package: ${{ needs.select.outputs.package }}
+      tag: ${{ needs.select.outputs.tag }}
+  pypi:
+    needs: [select, build]
+    if: needs.select.outputs.package == 'python'
+    runs-on: ubuntu-24.04
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: package-python
+          path: artifacts
+      - run: |
+          mkdir dist
+          cp artifacts/*.whl artifacts/*.tar.gz dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+  npm:
+    needs: [select, build]
+    if: needs.select.outputs.package == 'nodejs'
+    runs-on: ubuntu-24.04
+    environment: npm
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: package-nodejs
+          path: artifacts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Publish tested tarball unless already present
+        env:
+          VERSION: ${{ needs.select.outputs.version }}
+        run: |
+          if npm view "byond-wire@$VERSION" version --json >version.json 2>registry-error; then
+            test "$(node -p 'JSON.parse(require("fs").readFileSync("version.json", "utf8"))')" = "$VERSION"
+          elif grep -q E404 registry-error; then
+            npm publish artifacts/*.tgz --access public
+          else
+            cat registry-error >&2
+            exit 1
+          fi
+  crates:
+    needs: [select, build]
+    if: needs.select.outputs.package == 'rust'
+    runs-on: ubuntu-24.04
+    environment: crates
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: package-rust
+          path: artifacts
+      - name: Extract tested crate
+        run: mkdir crate && tar -xzf artifacts/*.crate -C crate --strip-components=1
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+      - name: Publish crate unless already present
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+          VERSION: ${{ needs.select.outputs.version }}
+        run: |
+          status=$(curl --silent --show-error -A 'byond-wire release (https://github.com/Wirewraith/byond-wire)' -o response.json -w '%{http_code}' "https://crates.io/api/v1/crates/byond-wire/$VERSION")
+          case "$status" in
+            200) ;;
+            404) cargo publish --manifest-path crate/Cargo.toml ;;
+            *) cat response.json >&2; exit 1 ;;
+          esac
+  nuget:
+    needs: [select, build]
+    if: needs.select.outputs.package == 'csharp'
+    runs-on: ubuntu-24.04
+    environment: nuget
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: package-csharp
+          path: artifacts
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - name: Publish library and tool
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push 'artifacts/*.nupkg' --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+  psgallery:
+    needs: [select, build]
+    if: needs.select.outputs.package == 'powershell'
+    runs-on: ubuntu-24.04
+    environment: psgallery
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: package-powershell
+          path: artifacts
+      - run: mkdir module && tar -xzf artifacts/ByondWire-source.tar.gz -C module
+      - name: Publish tested module unless already present
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+          VERSION: ${{ needs.select.outputs.version }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $url = "https://www.powershellgallery.com/api/v2/Packages(Id='ByondWire',Version='$env:VERSION')"
+          $response = Invoke-WebRequest -Uri $url -SkipHttpErrorCheck
+          if ($response.StatusCode -eq 404) {
+            if (!$env:PSGALLERY_API_KEY) { throw 'PSGALLERY_API_KEY is required' }
+            Publish-Module -Path ./module/ByondWire -Repository PSGallery -NuGetApiKey $env:PSGALLERY_API_KEY
+          } elseif ($response.StatusCode -ne 200) {
+            throw "Gallery lookup failed: $($response.StatusCode)"
+          }
+  packagist:
+    needs: [select, build]
+    if: needs.select.outputs.package == 'php'
+    runs-on: ubuntu-24.04
+    environment: packagist
+    steps:
+      - name: Refresh Packagist from the validated PHP version tag
+        env:
+          PACKAGIST_USERNAME: ${{ secrets.PACKAGIST_USERNAME }}
+          PACKAGIST_API_TOKEN: ${{ secrets.PACKAGIST_API_TOKEN }}
+        run: |
+          test -n "$PACKAGIST_USERNAME" && test -n "$PACKAGIST_API_TOKEN"
+          curl --fail-with-body --silent --show-error --request POST \
+            --header "Authorization: Bearer $PACKAGIST_USERNAME:$PACKAGIST_API_TOKEN" \
+            --header 'Content-Type: application/json' \
+            --user-agent 'byond-wire release (https://github.com/Wirewraith/byond-wire)' \
+            --data '{"repository":"https://github.com/Wirewraith/byond-wire"}' \
+            https://packagist.org/api/update-package
+  go:
+    needs: [select, build]
+    if: needs.select.outputs.package == 'go'
+    runs-on: ubuntu-24.04
+    environment: go
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+          cache: false
+      - name: Resolve public version through Go module infrastructure
+        env:
+          VERSION: ${{ needs.select.outputs.version }}
+          GOWORK: 'off'
+          GOPROXY: https://proxy.golang.org
+        run: go mod download -json "github.com/Wirewraith/byond-wire/go@v$VERSION"

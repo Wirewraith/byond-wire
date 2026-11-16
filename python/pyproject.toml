@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "byond-wire"
+version = "0.1.0"
+description = "Small standard-library BYOND Topic client"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Wirewraith"}]
+
+[project.urls]
+Repository = "https://github.com/Wirewraith/byond-wire"
+
+[project.scripts]
+byond-wire = "byond_wire:main"
+
+[tool.setuptools]
+py-modules = ["byond_wire"]

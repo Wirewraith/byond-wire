@@ -1,0 +1,133 @@
+name: Build native package
+
+on:
+  workflow_call:
+    inputs:
+      package:
+        required: true
+        type: string
+      tag:
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PACKAGE: ${{ inputs.package }}
+      RELEASE_TAG: ${{ inputs.tag }}
+      GOWORK: 'off'
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        if: inputs.package == 'nodejs'
+        with:
+          node-version: '24'
+      - uses: actions/setup-go@v5
+        if: inputs.package == 'go'
+        with:
+          go-version-file: go/go.mod
+          cache: false
+      - uses: actions/setup-dotnet@v4
+        if: inputs.package == 'csharp'
+        with:
+          dotnet-version: '10.0.x'
+      - name: Stage package and verify release version
+        run: |
+          export SOURCE="$RUNNER_TEMP/ByondWire"
+          printf 'SOURCE=%s\n' "$SOURCE" >> "$GITHUB_ENV"
+          args=()
+          if [ -n "$RELEASE_TAG" ]; then args=(--tag "$RELEASE_TAG"); fi
+          python3 packaging/release.py "$PACKAGE" "${args[@]}" --output "$SOURCE"
+          mkdir artifacts
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          sys.path.insert(0, 'packaging')
+          import release
+          package = os.environ['PACKAGE']
+          with open('artifacts/release.json', 'w') as output:
+              json.dump({'package': package, 'version': release.version(package),
+                         'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()}, output)
+          PY
+      - name: Python regression tests and distributions
+        if: inputs.package == 'python'
+        run: |
+          python3 -m pip install build twine
+          cd "$SOURCE"
+          python3 -m unittest discover
+          python3 -m build --outdir "$GITHUB_WORKSPACE/artifacts"
+          python3 -m twine check "$GITHUB_WORKSPACE"/artifacts/*.whl "$GITHUB_WORKSPACE"/artifacts/*.tar.gz
+      - name: Node regression tests and tarball
+        if: inputs.package == 'nodejs'
+        run: |
+          cd "$SOURCE"
+          npm test
+          npm pack --pack-destination "$GITHUB_WORKSPACE/artifacts"
+      - name: Rust regression tests and crate
+        if: inputs.package == 'rust'
+        run: |
+          cd "$SOURCE"
+          cargo test --offline
+          cargo package --offline
+          cp target/package/*.crate "$GITHUB_WORKSPACE/artifacts/"
+      - name: PHP regression tests and Composer archive
+        if: inputs.package == 'php'
+        run: |
+          cd "$SOURCE"
+          COMPOSER_ROOT_VERSION=$(cat php/VERSION)
+          export COMPOSER_ROOT_VERSION
+          composer validate --strict
+          composer test
+          composer archive --format=zip --file=byond-wire --dir="$GITHUB_WORKSPACE/artifacts"
+      - name: PowerShell regression tests and module package
+        if: inputs.package == 'powershell'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Test-ModuleManifest "$env:SOURCE/ByondWire.psd1" | Out-Null
+          & "$env:SOURCE/test-byond-wire.ps1"
+          if ($LASTEXITCODE) { throw "PowerShell tests failed: $LASTEXITCODE" }
+          Remove-Item "$env:SOURCE/test-byond-wire.ps1", "$env:SOURCE/tests" -Recurse
+          Register-PSRepository -Name ByondWireBuild -SourceLocation "$env:GITHUB_WORKSPACE/artifacts" -PublishLocation "$env:GITHUB_WORKSPACE/artifacts" -InstallationPolicy Trusted
+          try { Publish-Module -Path $env:SOURCE -Repository ByondWireBuild -NuGetApiKey local } finally { Unregister-PSRepository ByondWireBuild }
+      - name: .NET regression tests and library/tool packages
+        if: inputs.package == 'csharp'
+        run: |
+          cd "$SOURCE"
+          dotnet run --project tests -c Release
+          dotnet pack ByondWire.csproj -c Release -o "$GITHUB_WORKSPACE/artifacts"
+          dotnet pack cli/ByondWire.Cli.csproj -c Release -o "$GITHUB_WORKSPACE/artifacts"
+      - name: Go regression tests and module sources
+        if: inputs.package == 'go'
+        run: |
+          cd "$SOURCE"
+          go test ./...
+          go build ./cmd/byond-wire
+          rm byond-wire
+          python3 - <<'PY'
+          import os, pathlib, zipfile
+          with zipfile.ZipFile(pathlib.Path(os.environ['GITHUB_WORKSPACE']) / 'artifacts/byond-wire-go.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+              for path in sorted(pathlib.Path('.').rglob('*')):
+                  if path.is_file():
+                      archive.write(path, path.as_posix())
+          PY
+      - name: Test installed artifact from a clean consumer
+        run: python3 packaging/smoke.py "$PACKAGE" artifacts
+      - name: Preserve publishable PowerShell sources
+        if: inputs.package == 'powershell'
+        run: tar -czf artifacts/ByondWire-source.tar.gz -C "$(dirname "$SOURCE")" ByondWire
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-${{ inputs.package }}
+          path: artifacts/
+          if-no-files-found: error
