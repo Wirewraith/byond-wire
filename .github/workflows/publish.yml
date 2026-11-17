@@ -86,7 +86,7 @@ jobs:
           if npm view "byond-wire@$VERSION" version --json >version.json 2>registry-error; then
             test "$(node -p 'JSON.parse(require("fs").readFileSync("version.json", "utf8"))')" = "$VERSION"
           elif grep -q E404 registry-error; then
-            npm publish artifacts/*.tgz --access public
+            npm publish ./artifacts/*.tgz --access public
           else
             cat registry-error >&2
             exit 1
