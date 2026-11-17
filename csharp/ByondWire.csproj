@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <PackageId>ByondWire</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Wirewraith</Authors>
     <Description>Small standard-library BYOND Topic client.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

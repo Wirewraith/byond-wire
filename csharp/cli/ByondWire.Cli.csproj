@@ -7,7 +7,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>byond-wire</ToolCommandName>
     <PackageId>ByondWire.Cli</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Wirewraith</Authors>
     <Description>Command-line BYOND Topic client.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

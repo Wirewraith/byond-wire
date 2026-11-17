@@ -1,6 +1,6 @@
 @{
     RootModule = 'ByondWire.psm1'
-    ModuleVersion = '0.1.0'
+    ModuleVersion = '0.1.1'
     GUID = 'b6325740-a5c1-4b98-b817-9dbfa3377f93'
     Author = 'Wirewraith'
     Copyright = '(c) 2026 Wirewraith. MIT license.'
