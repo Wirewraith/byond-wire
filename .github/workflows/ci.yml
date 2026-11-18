@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
   pull_request:
   workflow_dispatch:
   workflow_call:
@@ -23,12 +23,12 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       - name: Lint workflows
         uses: docker://rhysd/actionlint:1.7.12
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7.1.0
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - run: python3 -m unittest discover -s packaging
       - run: python3 -m unittest discover -s benchmarks
       - run: sudo apt-get update && sudo apt-get install -y socat netcat-openbsd
@@ -46,25 +46,26 @@ jobs:
       matrix:
         package: [python, nodejs, php, powershell]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
         if: matrix.package == 'python'
         with:
-          python-version: '3.9'
-      - uses: actions/setup-node@v4
+          python-version: "3.9"
+      - uses: actions/setup-node@v7.1.0
         if: matrix.package == 'nodejs'
         with:
-          node-version: '18'
+          node-version: "18"
+          package-manager-cache: false
       - uses: shivammathur/setup-php@v2
         if: matrix.package == 'php'
         with:
-          php-version: '8.0'
+          php-version: "8.0"
           coverage: none
           tools: none
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6.1.0
         if: matrix.package == 'powershell'
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: "8.0.x"
       - name: Test Python 3.9
         if: matrix.package == 'python'
         run: python3 -m unittest discover -s python
@@ -83,7 +84,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       - shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'

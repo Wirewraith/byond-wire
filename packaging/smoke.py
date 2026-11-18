@@ -90,7 +90,8 @@ def smoke(package, artifacts, work):
             archive.extractall(work, filter='data')
         crate = work / f'byond-wire-{version}'
         run(['cargo', 'test', '--offline'], crate)
-        run(['cargo', 'install', '--offline', '--path', crate, '--root', work / 'installed'], work)
+        env['PATH'] = str(work / 'installed/bin') + os.pathsep + env['PATH']
+        run(['cargo', 'install', '--offline', '--path', crate, '--root', work / 'installed'], work, env=env)
         cli = [work / 'installed/bin/byond-wire']
         (work / 'Cargo.toml').write_text('[package]\nname="consumer"\nversion="0.0.0"\nedition="2021"\n[dependencies]\nbyond-wire={path=' + json.dumps(str(crate)) + '}\n')
         (work / 'src').mkdir()
