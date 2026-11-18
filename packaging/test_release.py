@@ -53,6 +53,11 @@ class ReleaseTests(unittest.TestCase):
                 self.assertEqual((stage / 'LICENSE').read_bytes(), (ROOT / 'LICENSE').read_bytes())
                 self.assertTrue((stage / 'README.md').is_file())
                 self.assertTrue((stage / 'PROTOCOL.md').is_file())
+                if package == 'php':
+                    readme = (stage / 'README.md').read_text()
+                    self.assertIn('composer require wirewraith/byond-wire', readme)
+                    self.assertIn('\\Byond\\topic_raw(', readme)
+                    self.assertNotIn('### Python', readme)
                 if package == 'go':
                     self.assertIn('github.com/Wirewraith/byond-wire/go/byond',
                                   (stage / 'README.md').read_text())

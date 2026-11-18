@@ -174,8 +174,35 @@ jobs:
     if: needs.select.outputs.package == 'php'
     runs-on: ubuntu-24.04
     environment: packagist
+    concurrency:
+      group: php-distribution
+      cancel-in-progress: false
     steps:
-      - name: Refresh Packagist from the validated PHP version tag
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: package-php
+          path: artifacts
+      - name: Publish tested PHP archive to distribution repository
+        env:
+          PHP_DISTRIBUTION_SSH_KEY: ${{ secrets.PHP_DISTRIBUTION_SSH_KEY }}
+          PHP_DISTRIBUTION_KNOWN_HOSTS: ${{ vars.PHP_DISTRIBUTION_KNOWN_HOSTS }}
+          RELEASE_TAG: ${{ needs.select.outputs.tag }}
+        run: |
+          test -n "$PHP_DISTRIBUTION_SSH_KEY" && test -n "$PHP_DISTRIBUTION_KNOWN_HOSTS"
+          ssh_directory=$(mktemp -d)
+          trap 'rm -rf "$ssh_directory"' EXIT
+          printf '%s\n' "$PHP_DISTRIBUTION_SSH_KEY" > "$ssh_directory/key"
+          chmod 600 "$ssh_directory/key"
+          printf '%s\n' "$PHP_DISTRIBUTION_KNOWN_HOSTS" > "$ssh_directory/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i $ssh_directory/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ssh_directory/known_hosts -o StrictHostKeyChecking=yes"
+          unzip -q artifacts/byond-wire.zip -d "$RUNNER_TEMP/php-distribution"
+          source_commit=$(python3 -c 'import json; print(json.load(open("artifacts/release.json"))["commit"])')
+          python3 packaging/publish_php.py "$RUNNER_TEMP/php-distribution" \
+            git@github.com:Wirewraith/byond-wire-php.git "$RELEASE_TAG" "$source_commit"
+      - name: Refresh Packagist from the PHP distribution repository
         env:
           PACKAGIST_USERNAME: ${{ secrets.PACKAGIST_USERNAME }}
           PACKAGIST_API_TOKEN: ${{ secrets.PACKAGIST_API_TOKEN }}
@@ -185,7 +212,7 @@ jobs:
             --header "Authorization: Bearer $PACKAGIST_USERNAME:$PACKAGIST_API_TOKEN" \
             --header 'Content-Type: application/json' \
             --user-agent 'byond-wire release (https://github.com/Wirewraith/byond-wire)' \
-            --data '{"repository":"https://github.com/Wirewraith/byond-wire"}' \
+            --data '{"repository":"https://github.com/Wirewraith/byond-wire-php"}' \
             https://packagist.org/api/update-package
   go:
     needs: [select, build]
