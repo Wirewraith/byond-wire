@@ -2,6 +2,21 @@
 
 Small, standalone clients for BYOND game servers.
 
+## Packages
+
+Library installation and project dependency commands; see the language examples below for CLI installation.
+Go's badge shows the latest matching repository tag.
+
+| Language   | Registry | Latest Version | Install |
+| ---------- | ------- | -------------- | ------- |
+| Python     | [PyPI](https://pypi.org/project/byond-wire) | ![PyPI](https://img.shields.io/pypi/v/byond-wire) | `python3 -m pip install byond-wire` |
+| JavaScript | [npm](https://www.npmjs.com/package/byond-wire) | ![npm](https://img.shields.io/npm/v/byond-wire) | `npm install byond-wire` |
+| Rust       | [Crates.io](https://crates.io/crates/byond-wire) | ![crates.io](https://img.shields.io/crates/v/byond-wire) | `cargo add byond-wire` |
+| C# / .NET  | [NuGet](https://www.nuget.org/packages/ByondWire) | ![NuGet](https://img.shields.io/nuget/v/ByondWire) | `dotnet add package ByondWire` |
+| PowerShell | [PowerShell Gallery](https://www.powershellgallery.com/packages/ByondWire) | ![gallery](https://img.shields.io/powershellgallery/v/ByondWire) | `Install-Module -Name ByondWire` |
+| PHP        | [Packagist](https://packagist.org/packages/wirewraith/byond-wire) | ![packagist](https://img.shields.io/packagist/v/wirewraith/byond-wire) | `composer require wirewraith/byond-wire` |
+| Go         | N/A | ![go](https://img.shields.io/github/v/tag/Wirewraith/byond-wire?filter=go%2Fv*&label=repo&color=orange) | `go get github.com/Wirewraith/byond-wire/go/byond` |
+
 ## Examples
 
 - Each language provides a reusable Topic library and a CLI, using standard libraries or the listed shell utilities.
