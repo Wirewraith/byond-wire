@@ -69,8 +69,7 @@ def stage(package, destination):
             target = destination / path.relative_to(source)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, target)
-    for name in ('LICENSE', 'PROTOCOL.md'):
-        shutil.copy2(ROOT / name, destination / name)
+    shutil.copy2(ROOT / 'LICENSE', destination / 'LICENSE')
     fixture = destination / ('byond/testdata/text-vectors.tsv' if package == 'go' else 'tests/text-vectors.tsv')
     fixture.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT / 'tests/text-vectors.tsv', fixture)
@@ -85,8 +84,7 @@ def stage(package, destination):
         section = section.replace('The root `go.work` supports the CLI command above.\n', '')
     (destination / 'README.md').write_text(
         '# BYOND Wire\n\nSmall, standard-library BYOND Topic client. MIT licensed.\n\n'
-        'Library calls return decoded text, numbers, or null. Raw calls preserve text bytes.\n'
-        'See [PROTOCOL.md](PROTOCOL.md) for encoding and wire details.\n\n' + section)
+        'Library calls return decoded text, numbers, or null. Raw calls preserve text bytes.\n\n' + section)
     return destination
 
 

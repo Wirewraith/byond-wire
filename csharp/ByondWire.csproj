@@ -16,6 +16,6 @@
   <ItemGroup>
     <Compile Include="ByondWire.cs" />
     <InternalsVisibleTo Include="ByondWire.Tests" />
-    <None Include="README.md;PROTOCOL.md;LICENSE" Pack="true" PackagePath="/" />
+    <None Include="README.md;LICENSE" Pack="true" PackagePath="/" />
   </ItemGroup>
 </Project>

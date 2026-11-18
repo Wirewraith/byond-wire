@@ -52,7 +52,8 @@ class ReleaseTests(unittest.TestCase):
                 stage = self.release.stage(package, pathlib.Path(directory) / package)
                 self.assertEqual((stage / 'LICENSE').read_bytes(), (ROOT / 'LICENSE').read_bytes())
                 self.assertTrue((stage / 'README.md').is_file())
-                self.assertTrue((stage / 'PROTOCOL.md').is_file())
+                self.assertFalse((stage / 'PROTOCOL.md').exists())
+                self.assertNotIn('PROTOCOL.md', (stage / 'README.md').read_text())
                 if package == 'php':
                     readme = (stage / 'README.md').read_text()
                     self.assertIn('composer require wirewraith/byond-wire', readme)

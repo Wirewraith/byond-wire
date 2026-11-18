@@ -12,7 +12,7 @@
   "type": "commonjs",
   "main": "byond-wire.js",
   "bin": { "byond-wire": "byond-wire.js" },
-  "files": ["byond-wire.js", "PROTOCOL.md"],
+  "files": ["byond-wire.js"],
   "engines": { "node": ">=18" },
   "scripts": { "test": "node --test test-byond-wire.js" },
   "publishConfig": { "access": "public" }

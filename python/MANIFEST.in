@@ -1,2 +1,2 @@
-include README.md PROTOCOL.md LICENSE cli.py test_byond_wire.py
+include README.md LICENSE cli.py test_byond_wire.py
 include tests/text-vectors.tsv

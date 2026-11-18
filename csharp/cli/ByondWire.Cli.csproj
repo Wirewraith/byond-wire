@@ -15,5 +15,5 @@
     <RepositoryUrl>https://github.com/Wirewraith/byond-wire</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup><ProjectReference Include="../ByondWire.csproj" /></ItemGroup>
-  <ItemGroup><None Include="../README.md;../PROTOCOL.md;../LICENSE" Pack="true" PackagePath="/" /></ItemGroup>
+  <ItemGroup><None Include="../README.md;../LICENSE" Pack="true" PackagePath="/" /></ItemGroup>
 </Project>

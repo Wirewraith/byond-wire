@@ -257,7 +257,7 @@ object? raw = await Client.TopicRawAsync("127.0.0.1", 4999, "status");
 // byte[], float, or null; text bytes retain formatting metadata.
 ```
 
-- `Client.DecodeText(bytes)` decodes raw text separately using the [encoding rules](PROTOCOL.md#text-encoding).
+- `Client.DecodeText(bytes)` decodes raw text separately.
 - Timeouts must be from `1` to `2147483647` milliseconds. One deadline covers DNS, address fallback, connection, and I/O.
 - DNS cancellation cannot stop native OS resolver work already in progress; numeric addresses avoid DNS.
 - Run the package-free library and CLI regression suite: `dotnet run --project csharp/tests -c Release`.

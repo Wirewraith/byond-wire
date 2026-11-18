@@ -6,7 +6,7 @@ description = "Small standard-library BYOND Topic client"
 license = "MIT"
 repository = "https://github.com/Wirewraith/byond-wire"
 readme = "README.md"
-include = ["*.rs", "tests/*.rs", "tests/text-vectors.tsv", "README.md", "PROTOCOL.md", "LICENSE"]
+include = ["*.rs", "tests/*.rs", "tests/text-vectors.tsv", "README.md", "LICENSE"]
 
 [lib]
 path = "byond-wire.rs"
