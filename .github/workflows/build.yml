@@ -106,8 +106,8 @@ jobs:
         run: |
           cd "$SOURCE"
           dotnet run --project tests -c Release
-          dotnet pack ByondWire.csproj -c Release -o "$GITHUB_WORKSPACE/artifacts"
-          dotnet pack cli/ByondWire.Cli.csproj -c Release -o "$GITHUB_WORKSPACE/artifacts"
+          dotnet pack ByondWire.csproj -c Release --no-build -o "$GITHUB_WORKSPACE/artifacts"
+          dotnet pack cli/ByondWire.Cli.csproj -c Release --no-build -o "$GITHUB_WORKSPACE/artifacts"
       - name: Go regression tests and module sources
         if: inputs.package == 'go'
         run: |
@@ -132,3 +132,4 @@ jobs:
           name: package-${{ inputs.package }}
           path: artifacts/
           if-no-files-found: error
+          retention-days: ${{ inputs.tag == '' && 7 || 0 }}

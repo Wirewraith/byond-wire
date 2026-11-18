@@ -34,7 +34,8 @@ fi
 The function isolates shell options, variables, traps, and file descriptors from its caller.
 Tests require Bash, `socat`, and GNU coreutils. Run CLI tests with
 `bash bash/test-cli.sh`, both sourced-library suites with `bash bash/test-import.sh`,
-and both text filters with `bash bash/test-text.sh`.
+and both text filters with `bash bash/test-text.sh`. Pass `bash` or `shell` to
+`bash/test-import.sh` to run one library suite.
 The optional socket-write regression, `python3 bash/test-write.py`, requires
 Linux x86-64, Python 3, and permission to trace child processes. It checks newline
 bytes in request lengths/queries, library and CLI writes, and temporary-file cleanup.

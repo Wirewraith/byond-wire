@@ -10,6 +10,11 @@ on:
 permissions:
   contents: read
 
+# Keep manual and release validation runs separate from automatic CI.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ (github.event_name == 'push' || github.event_name == 'pull_request') && (github.event.pull_request.number || github.ref) || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+
 jobs:
   packages:
     strategy:
@@ -30,13 +35,34 @@ jobs:
         with:
           python-version: "3.12"
       - run: python3 -m unittest discover -s packaging
+      - run: bash bash/test-text.sh
+  benchmarks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
       - run: python3 -m unittest discover -s benchmarks
+  shells:
+    name: Shell (${{ matrix.variant }}, ${{ matrix.suite }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [bash, shell]
+        suite: [cli, library]
+    steps:
+      - uses: actions/checkout@v7.0.1
       - run: sudo apt-get update && sudo apt-get install -y socat netcat-openbsd
-      - run: |
-          bash bash/test-cli.sh
-          bash bash/test-import.sh
-          bash bash/test-text.sh
-          sh shell/test-cli.sh
+      - name: Test CLI
+        if: matrix.suite == 'cli'
+        run: bash "${{ matrix.variant }}/test-cli.sh"
+      - name: Test library
+        if: matrix.suite == 'library'
+        run: bash bash/test-import.sh "${{ matrix.variant }}"
   minimum-runtimes:
     name: Minimum runtime (${{ matrix.package }})
     runs-on: ubuntu-24.04

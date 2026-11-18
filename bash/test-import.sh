@@ -1,7 +1,8 @@
 #!/bin/bash
 set -eu
 cd "$(dirname "$0")"
-for variant in bash shell; do
+if [[ $# == 0 ]]; then set -- bash shell; fi
+for variant; do
   work=$(mktemp -d)
   trap 'rm -rf "$work"' EXIT
   library=$(cd "../$variant" && pwd)/byond-wire.sh
